@@ -5,8 +5,10 @@
 function DoExport(CarCalculator, CarFile)
 	UAPI.Log("DoExport: ")
 
+	local value = {}
+
 	local CarFiles = CExporter.ExportCarFiles(CarCalculator)
-	CarFiles[string.format("%s - %s.car", CarCalculator.CarInfo.PlatformInfo.Name, CarCalculator.CarInfo.TrimInfo.Name)] = CarFile
+	CarFiles[string.format("%s - %s.car", CarCalculator.CarInfo.PlatformInfo.Name, CarCalculator.CarInfo.TrimInfo.Name)] = CarFile --remove this if you don't want the file exported
 
 	local Data = {}
 
@@ -32,7 +34,7 @@ function CExporter.ExportCarFiles(CarCalculator)
 
 	Files = { }
 
-	Files["carInfoDump.txt"] = dump(CarInfo)
+	Files["carInfoDump.txt"] = CarInfo.TrimInfo.Name
 
 	return Files
 end

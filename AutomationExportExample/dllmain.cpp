@@ -2,7 +2,6 @@
 ** Copyright(c) 2019 -- Camshaft Software PTY LTD
 ** All Rights Reserved
 ************************************************** */
-#define GIT_TEST_DEBUG_UNSAFE_DIRECTORIES = true
 
 #include "stdafx.h"
 
@@ -13,10 +12,10 @@
 #include <windows.h>
 #include <shobjidl.h>
 #include <commdlg.h>
-#include <filesystem>
 #include <fstream>
 
 static LPCSTR s_LuaFilePath;
+static std::vector<byte> s_LuaFileBytes;
 
 //Gets the plugin name, to be displayed in the drop-down list of available plugins
 AuCarExpErrorCode AuCarExportDLL::GetExporterName(AuCarExpArray<wchar_t>& name, wchar_t const* locale)
@@ -59,7 +58,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringDataCount(unsigned int* retCo
 //Gets the user-supplied string information
 AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUIStringData>& stringData, wchar_t const* locale)
 {
-	if (stringData.GetCount() != 2)
+	if (stringData.GetCount() != 1)
 	{
 		//Automation has not given us the number of items we asked for
 		//(this should never happen)
@@ -322,7 +321,7 @@ AuCarExpErrorCode AuCarExportDLL::GetLUAFileLength(unsigned int* retLength)
 	ofn.hwndOwner = NULL;
 	ofn.lpstrFile = szFile;
 	ofn.nMaxFile = sizeof(szFile);
-	LPCSTR filter = "";
+	LPCSTR filter = "Lua Files (*.lua)\0*.lua\0All Files (*.*)\0*.*\0";
 	ofn.lpstrFilter = filter;
 	ofn.nFilterIndex = 1;
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
@@ -346,13 +345,29 @@ AuCarExpErrorCode AuCarExportDLL::GetLUAFileLength(unsigned int* retLength)
 
 	//unsigned int size = SizeofResource(module, hRes);
 
-	std::ifstream in(s_LuaFilePath, std::ifstream::ate | std::ifstream::binary);
+	std::ifstream file(s_LuaFilePath, std::ifstream::ate | std::ifstream::binary);
 
-	unsigned int size = in.tellg();
+	if(!file.is_open())
+		return AuCarExpErrorCode_UnknownError;
 
-	in.close();
+	unsigned int size = file.tellg();
 
-	*retLength = size + 1;//size in chars (what we need) is the byte size. We add one for a null terminator
+	// get the length of the file
+	file.seekg(0, std::ifstream::end);
+	size_t fileSize = file.tellg();
+	file.seekg(0, std::ifstream::beg);
+
+	// create a vector to hold all the bytes in the file
+	std::vector<byte> data(fileSize, 0);
+
+	// read the file
+	file.read(reinterpret_cast<char*>(&data[0]), fileSize);
+	s_LuaFileBytes = data;
+
+	// close the file
+	file.close();
+
+	*retLength = size; //+ 1;//size in chars (what we need) is the byte size. We add one for a null terminator
 
 	return AuCarExpErrorCode_Success;
 }
@@ -387,38 +402,31 @@ AuCarExpErrorCode AuCarExportDLL::GetLUAFile(AuCarExpArray<wchar_t>& stringBuffe
 	//unsigned int size = in.tellg();
 
 	// open the file for binary reading
-	std::ifstream file;
-	file.open(s_LuaFilePath, std::ifstream::binary);
-	if (!file.is_open())
-		return AuCarExpErrorCode_UnknownError;
+	//std::ifstream file;
+	//file.open(s_LuaFilePath, std::ifstream::binary);
+	//if (!file.is_open())
+	//	return AuCarExpErrorCode_UnknownError;
 
-	// get the length of the file
-	file.seekg(0, std::ifstream::end);
-	size_t fileSize = file.tellg();
-	file.seekg(0, std::ifstream::beg);
+	
 
-	// create a vector to hold all the bytes in the file
-	std::vector<byte> data(fileSize, 0);
-
-	// read the file
-	file.read(reinterpret_cast<char*>(&data[0]), fileSize);
-
-	// close the file
-	file.close();
-
-	if ((fileSize + 1) <= stringBuffer.GetCount())
+	//if ((fileSize + 1) <= stringBuffer.GetCount())
+	//{
+	unsigned int fileSize = stringBuffer.GetCount() - 1;
+	for (unsigned int i = 0; i < fileSize; i++)
 	{
-		for (unsigned int i = 0; i < fileSize; i++)
-		{
-			stringBuffer[i] = data[i];
-		}
-
-		stringBuffer[fileSize] = '\0';
+		stringBuffer[i] = s_LuaFileBytes[i];
 	}
-	else
-		return AuCarExpErrorCode_UnknownError;
+
+	stringBuffer[fileSize] = '\0';
+	//}
+	//else
+	//	return AuCarExpErrorCode_UnknownError;
 
 	//UnlockResource(hResourceLoaded);
+	s_LuaFileBytes.clear();
+	//delete &s_LuaFileBytes;
+	
+	//delete &s_LuaFilePath;
 
 	return AuCarExpErrorCode_Success;
 }
