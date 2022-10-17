@@ -51,7 +51,7 @@ AuCarExpErrorCode AuCarExportDLL::GetExporterVersion(unsigned int* VersionNumber
 AuCarExpErrorCode AuCarExportDLL::GetRequiredStringDataCount(unsigned int* retCount)
 {
 	//we will want to get 2 lots of string information from the user:
-	*retCount = 2;
+	*retCount = 1;
 
 	return AuCarExpErrorCode_Success;
 }
@@ -67,11 +67,11 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 	}
 
 	//set the values:
-	wcscpy_s(stringData[0].Label, L"File Name");//label
+	wcscpy_s(stringData[0].Label, L"Folder Name");//label
 	wcscpy_s(stringData[0].Value, L"[PlayerName] [PlatformName] [TrimName]");//default value
 
-	wcscpy_s(stringData[1].Label, L"Folder Name");//label
-	wcscpy_s(stringData[1].Value, L"luaExporter");//default value, containing wildcards to be filled with information from Automation
+	//wcscpy_s(stringData[1].Label, L"Folder Name");//label
+	//wcscpy_s(stringData[1].Value, L"luaExporter");//default value, containing wildcards to be filled with information from Automation
 
 	return AuCarExpErrorCode_Success;
 }

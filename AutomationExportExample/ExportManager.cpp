@@ -22,8 +22,8 @@ size_t FindDirDelimiter(std::wstring dir, size_t start)
 AuExpManager* AuExpManager::s_Instance = nullptr;
 
 AuExpManager::AuExpManager() :
-	m_ExportDirectory(L""),
-	m_ExportFolder(L"luaExporter")
+	m_ExportDirectory(L"")
+	//m_ExportFolder(L"luaExporter")
 {
 	s_Instance = this;
 }
@@ -34,13 +34,13 @@ AuCarExpErrorCode AuExpManager::Init(const AuCarExpCarData* carData)
 	TCHAR path[MAX_PATH];
 
 	m_CarData = carData;
-	m_ExportFolder = m_CarData->GetStringData(1)->Value;
+	//m_ExportFolder = m_CarData->GetStringData(1)->Value;
 
 	//get the user's documents directory:
 	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
 	{
 		m_ExportDirectory = path;
-		m_ExportDirectory += L"\\AutomationGame\\luaExporter\\" + m_ExportDirectory;
+		m_ExportDirectory += L"\\AutomationGame\\luaExporter\\";
 	}
 	else
 	{
@@ -113,20 +113,16 @@ void AuExpManager::EndExport()
 
 void AuExpManager::ExportInternal()
 {
-	bool isEngineSeparate = m_CarData->GetBoolData(0)->Value;
-	bool areChoicesSeparate = m_CarData->GetBoolData(1)->Value;
-
-	m_FileName = m_CarData->GetStringData(0)->Value;
-
-	for (std::wstring::iterator i = m_FileName.begin(); i < m_FileName.end(); i++)
-	{
-		if (IllegalCharacters.find(*i) != std::wstring::npos)
-		{
-			*i = L'_';
-		}
-	}
+	//m_FileName = m_CarData->GetStringData(0)->Value;
+	//
+	//for (std::wstring::iterator i = m_FileName.begin(); i < m_FileName.end(); i++)
+	//{
+	//	if (IllegalCharacters.find(*i) != std::wstring::npos)
+	//	{
+	//		*i = L'_';
+	//	}
+	//}
 	
-	//return true;
 }
 
 void AuExpManager::AddLuaFiles(const AuCarExpArray<AuCarLuaDataFile>& data)

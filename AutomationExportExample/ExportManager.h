@@ -30,11 +30,6 @@ public:
 
 
 	void AddLuaFiles(const AuCarExpArray<AuCarLuaDataFile>& Data);
-	void AddLuaStringData(const AuCarExpArray<AuCarExpLuaStringData>& Data);
-	void AddLuaFloatData(const AuCarExpArray<AuCarExpLuaFloatData>& Data);
-	bool TryGetFloatData(const std::wstring& key, float* retValue);
-	bool TryGetFloatDataString(const std::wstring& key, std::wstring* retValue);
-	bool TryGetStringData(const std::wstring& key, std::wstring& value);
 
 	const wchar_t* GetCarName() const { return m_CarData->GetCarName(); }
 
@@ -56,7 +51,7 @@ private:
 	const AuCarExpCarData* m_CarData;
 
 	std::wstring m_ExportDirectory;
-	std::wstring m_ExportFolder;
+	//std::wstring m_ExportFolder;
 
 
 	std::map<std::wstring, float> m_LuaFloatData;
