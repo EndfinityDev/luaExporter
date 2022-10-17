@@ -1,7 +1,7 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
 // Used by luaExporter.rc
-//#define IDR_LUA_FILE	101
+#define IDR_LUA_FILE	101
 
 // Next default values for new objects
 //

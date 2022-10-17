@@ -7,7 +7,7 @@
 #include <Shlobj.h>
 #include "FileManager.h"
 
-size_t FindDirDelimiter(std::wstring dir, size_t start)
+size_t AuExpManager::FindDirDelimiter(std::wstring dir, size_t start)
 {
 	size_t slashPos = dir.find(L"\\", start);
 

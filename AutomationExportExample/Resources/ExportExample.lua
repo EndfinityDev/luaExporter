@@ -34,7 +34,7 @@ function CExporter.ExportCarFiles(CarCalculator)
 
 	Files = { }
 
-	Files["carInfoDump.txt"] = CarInfo.TrimInfo.Name
+	Files["trimNameExport.txt"] = CarInfo.TrimInfo.Name
 
 	return Files
 end

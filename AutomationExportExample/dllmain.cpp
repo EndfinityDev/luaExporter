@@ -13,24 +13,17 @@
 #include <shobjidl.h>
 #include <commdlg.h>
 #include <fstream>
+#include <ShlObj.h>
+#include "FileManager.h"
+#include "LuaFileManager.h"
 
-static LPCSTR s_LuaFilePath;
-static std::vector<byte> s_LuaFileBytes;
+//static LPCSTR s_LuaFilePath;
+//static std::vector<byte> s_LuaFileBytes;
 
 //Gets the plugin name, to be displayed in the drop-down list of available plugins
 AuCarExpErrorCode AuCarExportDLL::GetExporterName(AuCarExpArray<wchar_t>& name, wchar_t const* locale)
 {
-	//Locale handling example (Automation default locale is "en-GB")
-	//go go Google Translate (don't do this for actual plugin text :) )
-
-	//your prefered strings handling method should go in here
-
-	//Languages supported by Automation at the time of writing this:
-	//(looking only at the language and not the region is enough for this example)
-	
-	//default to English
 	wcscpy_s(name.GetData(), name.GetCount(), L"luaExporter");
-	
 
 	return AuCarExpErrorCode_Success;
 }
@@ -41,15 +34,12 @@ AuCarExpErrorCode AuCarExportDLL::GetExporterVersion(unsigned int* VersionNumber
 {
 	*VersionNumber = EXPVERSION;
 
-	//CheckExporterVersion();
-
 	return AuCarExpErrorCode_Success;
 }
 
 //Gets the number of user-supplied strings that the plugin will be requesting
 AuCarExpErrorCode AuCarExportDLL::GetRequiredStringDataCount(unsigned int* retCount)
 {
-	//we will want to get 2 lots of string information from the user:
 	*retCount = 1;
 
 	return AuCarExpErrorCode_Success;
@@ -69,16 +59,12 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 	wcscpy_s(stringData[0].Label, L"Folder Name");//label
 	wcscpy_s(stringData[0].Value, L"[PlayerName] [PlatformName] [TrimName]");//default value
 
-	//wcscpy_s(stringData[1].Label, L"Folder Name");//label
-	//wcscpy_s(stringData[1].Value, L"luaExporter");//default value, containing wildcards to be filled with information from Automation
-
 	return AuCarExpErrorCode_Success;
 }
 
 //Gets the number of user-supplied booleans that the plugin will be requesting
 AuCarExpErrorCode AuCarExportDLL::GetRequiredBoolDataCount(unsigned int* retCount)
 {
-	//we will want to get 2 booleans from the user:
 	*retCount = 0;
 
 	return AuCarExpErrorCode_Success;
@@ -145,27 +131,18 @@ AuCarExpErrorCode AuCarExportDLL::FreeAllData()
 //Export the car body mesh
 AuCarExpErrorCode AuCarExportDLL::AddBodyMesh(AuCarExpMesh* mesh)
 {
-	//AuExpManager::Instance()->SaveMesh(mesh, L"car_body");
-
 	return AuCarExpErrorCode_Success;
 }
 
 //Export a (single) fixture
 AuCarExpErrorCode AuCarExportDLL::AddFixtureMeshes(const AuCarExpArray<AuCarExpMesh*>& meshes, bool isBreakable, const wchar_t* name, const bool isTowBar, const AuCarExpVector& towPosition)
 {
-	//for (unsigned int i = 0; i < meshes.GetCount(); i++)
-	//{
-	//	AuExpManager::Instance()->SaveMesh(meshes[i], L"fixture");
-	//}
-
 	return AuCarExpErrorCode_Success;
 }
 
 //Export an engine mesh
 AuCarExpErrorCode  AuCarExportDLL::AddEngineMesh(const AuCarExpMesh* mesh, const wchar_t* name)
 {
-	//AuExpManager::Instance()->SaveMesh(mesh, L"engine");
-
 	return AuCarExpErrorCode_Success;
 }
 
@@ -179,11 +156,6 @@ AuCarExpErrorCode  AuCarExportDLL::AddEngineMeshInstance(const AuCarExpMeshInsta
 //meshes will include piping, catalytic converter, mufflers and exhaust tip fixture (if present)
 AuCarExpErrorCode  AuCarExportDLL::AddExhaust(const AuCarExpArray<AuCarExpMesh*>& meshes, const AuCarExpArray<AuCarExpVector>& points)
 {
-	//for (unsigned int i = 0; i < meshes.GetCount(); i++)
-	//{
-	//	AuExpManager::Instance()->SaveMesh(meshes[i], L"exhaust");
-	//}
-
 	return AuCarExpErrorCode_Success;
 }
 
@@ -196,35 +168,17 @@ AuCarExpErrorCode  AuCarExportDLL::AddCameraPositions(const AuCarExpVector* driv
 //Export a pair of wheels (either front or back), including the suspension meshes
 AuCarExpErrorCode  AuCarExportDLL::AddWheelPair(const AuCarExpWheelData& wheelData, const bool isFront)
 {
-	//AuExpManager::Instance()->SaveMesh(wheelData.SuspensionMesh, isFront ? L"suspension_front" : L"suspension_");
-	//AuExpManager::Instance()->SaveMesh(wheelData.RimMesh, isFront ? L"rim_front" : L"rim_rear");
-	//AuExpManager::Instance()->SaveMesh(wheelData.TyreMesh, isFront ? L"tyre_front" : L"tyre_rear");
-	//
-	//for (int i = 0; i < 3; i++)
-	//{
-	//	AuExpManager::Instance()->SaveMesh(wheelData.BrakeMeshes[i], isFront ? L"brake_front" : L"brake_rear");
-	//}
-
 	return AuCarExpErrorCode_Success;
 }
 
 //Export the chassis meshes
 AuCarExpErrorCode  AuCarExportDLL::AddChassis(const AuCarExpArray<AuCarExpMesh*>& meshes)
 {
-	//for (unsigned int i = 0; i < meshes.GetCount(); i++)
-	//{
-	//	AuExpManager::Instance()->SaveMesh(meshes[i], L"chassis");
-	//}
-
 	return AuCarExpErrorCode_Success;
 }
 
-//Export the stamp map
-//See Readme.txt for more information
 AuCarExpErrorCode AuCarExportDLL::SetStampTexture(AuCarExpTexture* stampTexture)
 {
-	//AuExpManager::Instance()->AddImage(stampTexture);
-
 	return AuCarExpErrorCode_Success;
 }
 
@@ -247,38 +201,15 @@ AuCarExpErrorCode AuCarExportDLL::GetPreviewTransformData(const AuCarExpVector* 
 	float carLength = carMax->z - carMin->z;
 	float carHeight = carMax->y - carMin->y;
 
-	/*
-
-	retLookAt->x = (carMin->x + carMax->x) * 0.5f;
-	retLookAt->y = (carMin->y + carMax->y) * 0.5f;
-	retLookAt->z = (carMin->z + carMax->z) * 0.5f;
-
-	retLookAt->z += 0.05f * carLength;
-	retLookAt->y -= 0.02f * carHeight;
-
-	*retPosition = *retLookAt;
-
-	retPosition->x -= 1.65f * carLength;
-	retPosition->z += 0.5f * carLength * 2.25f;
-
-	retPosition->y += 0.3f * carHeight * 1.12f;
-
-	*/
-
 	retLookAt->x = (carMin->x + carMax->x) * 0.0f;
 	retLookAt->y = (carMin->y + carMax->y) * 0.5f;
 	retLookAt->z = (carMin->z + carMax->z) * 0.5f;
 
-	//retLookAt->z += 0.05f * carLength;
 	retLookAt->y -= 0.02f * carHeight;
 
 	*retPosition = *retLookAt;
 
 	retPosition->x -= 3.5f * carLength;
-	//retPosition->z += 0.2f * carLength;
-	//retPosition->z = (carMin->z + carMax->z) * 0.8f;
-
-	//retPosition->y += 1.0f * carHeight;
 
 	return AuCarExpErrorCode_Success;
 }
@@ -308,12 +239,86 @@ AuCarExpErrorCode AuCarExportDLL::AddLuaStringData(const AuCarExpArray<AuCarExpL
 	return AuCarExpErrorCode_Success;
 }
 
+size_t AuCarExportDLL::FindDirDelimiter(std::wstring dir, size_t start)
+{
+	size_t slashPos = dir.find(L"\\", start);
+
+	if (slashPos == std::wstring::npos)
+	{
+		return dir.find(L"/", start);
+	}
+
+	return slashPos;
+}
+
 
 AuCarExpErrorCode AuCarExportDLL::GetLUAFileLength(unsigned int* retLength)
 {
+	LuaFileManager::Init();
+
+	HGLOBAL hResourceLoaded;  // handle to loaded resource
+	HRSRC   hRes;              // handle/ptr to res. info.
+
+	HMODULE module = GetModuleHandle(PROJECT_FILENAME);
+
+	hRes = FindResource(module, MAKEINTRESOURCE(IDR_LUA_FILE), TEXT("BINARY"));
+
+	TCHAR path[MAX_PATH];
+
+	if (hRes)
+	{
+
+		unsigned int size = SizeofResource(module, hRes);
+
+		hResourceLoaded = LoadResource(module, hRes);
+		char* data = (char*)LockResource(hResourceLoaded);
+
+
+		std::wstring exampleLuaFilePath;
+
+		//get the user's documents directory:
+		if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
+		{
+			exampleLuaFilePath = path;
+			exampleLuaFilePath += L"\\AutomationGame\\luaExporter\\.scripts\\";
+
+			DWORD att = GetFileAttributes(exampleLuaFilePath.c_str());
+
+			if (att == INVALID_FILE_ATTRIBUTES)
+			{
+				//create directory, one level at a time:
+				size_t slashPos = FindDirDelimiter(exampleLuaFilePath, 0);
+				size_t offset = 0;
+
+				while (slashPos != std::wstring::npos)
+				{
+					CreateDirectory(exampleLuaFilePath.substr(offset, slashPos - offset).c_str(), nullptr);
+					slashPos = FindDirDelimiter(exampleLuaFilePath, slashPos + 1);
+				}
+
+				//last one:
+				CreateDirectory(exampleLuaFilePath.c_str(), nullptr);
+
+				att = GetFileAttributes(exampleLuaFilePath.c_str());
+			}
+
+			if (att != INVALID_FILE_ATTRIBUTES && att & FILE_ATTRIBUTE_DIRECTORY)
+			{
+				FileManager fileManager;
+
+				unsigned int dataSize = SizeofResource(module, hRes);
+
+				FILE* OutFile = fileManager.OpenFileGlobal((exampleLuaFilePath + L"ExportExample.lua").c_str(), L"wb");
+				if(OutFile)
+					fwrite(data, 1, dataSize, OutFile);
+			}
+		}
+		UnlockResource(hResourceLoaded);
+	}
+
+
 	*retLength = 0;
 
-	/////////////////////////////////////////////////////////////////////
 	OPENFILENAMEA ofn;
 	CHAR szFile[260] = { 0 };
 	ZeroMemory(&ofn, sizeof(OPENFILENAME));
@@ -325,27 +330,27 @@ AuCarExpErrorCode AuCarExportDLL::GetLUAFileLength(unsigned int* retLength)
 	ofn.lpstrFilter = filter;
 	ofn.nFilterIndex = 1;
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+
+	char initDir[MAX_PATH];
+
+	if (SHGetFolderPathA(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, initDir) == S_OK)
+	{
+		std::string localDir("\\AutomationGame\\luaExporter\\.scripts\\"); // TODO: figure out why this is not working
+		std::string fullDir(initDir + localDir);
+		ofn.lpstrInitialDir = fullDir.c_str();
+	}
 	if (GetOpenFileNameA(&ofn) == TRUE)
 	{
-		s_LuaFilePath = ofn.lpstrFile;
+		//s_LuaFilePath = ofn.lpstrFile;
+		LuaFileManager::Instance()->SetLuaFilePath(ofn.lpstrFile);
 	}
-	/////////////////////////////////////////////////////////////////////
-
-	//HRSRC   hRes;              // handle/ptr to res. info.
-	//
-	//HMODULE module = GetModuleHandle(PROJECT_FILENAME);
-	//
-	//hRes = FindResource(module, MAKEINTRESOURCE(IDR_LUA_FILE), TEXT("BINARY"));
-
-	//if (!hRes)
 	else
 	{
 		return AuCarExpErrorCode_UnknownError;
 	}
 
-	//unsigned int size = SizeofResource(module, hRes);
 
-	std::ifstream file(s_LuaFilePath, std::ifstream::ate | std::ifstream::binary);
+	std::ifstream file(LuaFileManager::Instance()->GetLuaFilePath(), std::ifstream::ate | std::ifstream::binary);
 
 	if(!file.is_open())
 		return AuCarExpErrorCode_UnknownError;
@@ -362,12 +367,12 @@ AuCarExpErrorCode AuCarExportDLL::GetLUAFileLength(unsigned int* retLength)
 
 	// read the file
 	file.read(reinterpret_cast<char*>(&data[0]), fileSize);
-	s_LuaFileBytes = data;
+	LuaFileManager::Instance()->SetLuaFileBytes(data);
 
 	// close the file
 	file.close();
 
-	*retLength = size; //+ 1;//size in chars (what we need) is the byte size. We add one for a null terminator
+	*retLength = size; //size in chars (what we need) is the byte size. We add one for a null terminator
 
 	return AuCarExpErrorCode_Success;
 }
@@ -411,10 +416,13 @@ AuCarExpErrorCode AuCarExportDLL::GetLUAFile(AuCarExpArray<wchar_t>& stringBuffe
 
 	//if ((fileSize + 1) <= stringBuffer.GetCount())
 	//{
+
+	std::vector<byte> data = LuaFileManager::Instance()->GetLuaFileBytes();
+
 	unsigned int fileSize = stringBuffer.GetCount() - 1;
 	for (unsigned int i = 0; i < fileSize; i++)
 	{
-		stringBuffer[i] = s_LuaFileBytes[i];
+		stringBuffer[i] = data[i];
 	}
 
 	stringBuffer[fileSize] = '\0';
@@ -423,7 +431,8 @@ AuCarExpErrorCode AuCarExportDLL::GetLUAFile(AuCarExpArray<wchar_t>& stringBuffe
 	//	return AuCarExpErrorCode_UnknownError;
 
 	//UnlockResource(hResourceLoaded);
-	s_LuaFileBytes.clear();
+	data.clear();
+	LuaFileManager::Free();
 	//delete &s_LuaFileBytes;
 	
 	//delete &s_LuaFilePath;

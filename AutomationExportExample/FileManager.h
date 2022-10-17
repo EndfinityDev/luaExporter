@@ -12,11 +12,12 @@ public:
 	//static FileManager* GetInstance() { return s_Instance; }
 
 	FILE* OpenFile(const wchar_t* path, const wchar_t* mode);
+	FILE* OpenFileGlobal(const wchar_t* path, const wchar_t* mode);
 
 	void CloseAllFiles();
 
 	bool CheckFileExists(const wchar_t* path);
-
+	
 
 private:
 

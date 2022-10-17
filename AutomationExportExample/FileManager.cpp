@@ -17,6 +17,20 @@ FILE* FileManager::OpenFile(const wchar_t* path, const wchar_t* mode)
 	return file;
 }
 
+FILE* FileManager::OpenFileGlobal(const wchar_t* path, const wchar_t* mode)
+{
+	FILE* file = nullptr;
+
+	errno_t err = _wfopen_s(&file, path, mode);
+
+	if (file)
+		m_Files[path] = file;
+	else
+		MessageBox(nullptr, path, TEXT("Error creating directory"), MB_OK);
+
+	return file;
+}
+
 void FileManager::CloseAllFiles() 
 {
 	for (auto& pair : m_Files)

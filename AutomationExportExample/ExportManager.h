@@ -42,7 +42,7 @@ private:
 
 	void ExportInternal();
 
-
+	size_t FindDirDelimiter(std::wstring dir, size_t start);
 
 	static AuExpManager* s_Instance;
 
