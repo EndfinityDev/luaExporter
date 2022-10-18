@@ -9,7 +9,7 @@ The .dll files are to be placed in the Steam\steamapps\common\Automation\UE427\A
 # Usage
 Select luaExporter in Automation's export manager and click export
 Next you will be asked to select a Lua file to run
-An example script can be found in C:\Users\[user]\AppData\Local\AutomationGame\luaExporter\.scripts
+An example script can be found in C:\Users\(user)\AppData\Local\AutomationGame\luaExporter\.scripts
 Once complete, the exported files can be found in C:\Users\[user]\AppData\Local\AutomationGame\luaExporter\[Folder Name], where [Folder Name] is defined in the exporter screen
 
 # Script creation
