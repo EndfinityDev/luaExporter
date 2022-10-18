@@ -16,6 +16,7 @@
 #include <ShlObj.h>
 #include "FileManager.h"
 #include "LuaFileManager.h"
+#include "Utils.h"
 
 //static LPCSTR s_LuaFilePath;
 //static std::vector<byte> s_LuaFileBytes;
@@ -241,8 +242,122 @@ AuCarExpErrorCode AuCarExportDLL::AddLuaStringData(const AuCarExpArray<AuCarExpL
 
 AuCarExpErrorCode AuCarExportDLL::GetLUAFileLength(unsigned int* retLength)
 {
-	
-	unsigned int size = LuaFileManager::Instance()->GetLuaFileSize();
+	LuaFileManager::Init();
+
+	HGLOBAL hResourceLoaded;  // handle to loaded resource
+	HRSRC   hRes;              // handle/ptr to res. info.
+
+	HMODULE module = GetModuleHandle(PROJECT_FILENAME);
+
+	hRes = FindResource(module, MAKEINTRESOURCE(IDR_LUA_FILE), TEXT("BINARY"));
+
+	TCHAR path[MAX_PATH];
+
+	if (hRes)
+	{
+
+		unsigned int size = SizeofResource(module, hRes);
+
+		hResourceLoaded = LoadResource(module, hRes);
+		char* data = (char*)LockResource(hResourceLoaded);
+
+
+		std::wstring exampleLuaFilePath;
+
+		//get the user's documents directory:
+		if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
+		{
+			exampleLuaFilePath = path;
+			exampleLuaFilePath += L"\\AutomationGame\\luaExporter\\.scripts\\";
+
+			DWORD att = GetFileAttributes(exampleLuaFilePath.c_str());
+
+			if (att == INVALID_FILE_ATTRIBUTES)
+			{
+				//create directory, one level at a time:
+				size_t slashPos = Utils::FindDirDelimiter(exampleLuaFilePath, 0);
+				size_t offset = 0;
+
+				while (slashPos != std::wstring::npos)
+				{
+					CreateDirectory(exampleLuaFilePath.substr(offset, slashPos - offset).c_str(), nullptr);
+					slashPos = Utils::FindDirDelimiter(exampleLuaFilePath, slashPos + 1);
+				}
+
+				//last one:
+				CreateDirectory(exampleLuaFilePath.c_str(), nullptr);
+
+				att = GetFileAttributes(exampleLuaFilePath.c_str());
+			}
+
+			if (att != INVALID_FILE_ATTRIBUTES && att & FILE_ATTRIBUTE_DIRECTORY)
+			{
+				FileManager fileManager;
+
+				unsigned int dataSize = SizeofResource(module, hRes);
+
+				FILE* OutFile = fileManager.OpenFileGlobal((exampleLuaFilePath + L"ExportExample.lua").c_str(), L"wb");
+				if (OutFile)
+					fwrite(data, 1, dataSize, OutFile);
+			}
+		}
+		UnlockResource(hResourceLoaded);
+	}
+
+	OPENFILENAMEW ofn;
+	WCHAR szFile[260] = { 0 };
+	ZeroMemory(&ofn, sizeof(OPENFILENAME));
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = NULL;
+	ofn.lpstrFile = szFile;
+	ofn.nMaxFile = sizeof(szFile);
+	LPCWSTR filter = L"Lua Files (*.lua)\0*.lua\0All Files (*.*)\0*.*\0";
+	ofn.lpstrFilter = filter;
+	ofn.nFilterIndex = 1;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
+
+	wchar_t initDir[MAX_PATH];
+	std::wstring localDir;
+	std::wstring fullDir;
+
+	if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, initDir) == S_OK)
+	{
+		localDir = L"\\AutomationGame\\luaExporter\\.scripts\\";
+		fullDir = initDir + localDir;
+		ofn.lpstrInitialDir = fullDir.c_str();
+	}
+	if (GetOpenFileNameW(&ofn) == TRUE)
+	{
+		//s_LuaFilePath = ofn.lpstrFile;
+		LuaFileManager::Instance()->SetLuaFilePath(ofn.lpstrFile);
+	}
+	else
+	{
+		return AuCarExpErrorCode_UnknownError;
+	}
+
+
+	std::ifstream file(LuaFileManager::Instance()->GetLuaFilePath(), std::ifstream::ate | std::ifstream::binary);
+
+	if (!file.is_open())
+		return AuCarExpErrorCode_UnknownError;
+
+	// get the length of the file
+	file.seekg(0, std::ifstream::end);
+	size_t fileSize = file.tellg();
+	file.seekg(0, std::ifstream::beg);
+
+	// create a vector to hold all the bytes in the file
+	std::vector<byte> data(fileSize, 0);
+
+	// read the file
+	file.read(reinterpret_cast<char*>(&data[0]), fileSize);
+	LuaFileManager::Instance()->SetLuaFileBytes(data);
+
+	// close the file
+	file.close();
+
+	unsigned int size = fileSize;
 
 	*retLength = size; //size in chars (what we need) is the byte size. We add one for a null terminator
 
