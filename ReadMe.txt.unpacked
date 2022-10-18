@@ -1,1 +1,7 @@
-Todo: add readme here
+Unpack the .dll files to Steam\steamapps\common\Automation\UE427\AutomationGame\Content\ExportPlugins
+
+When running the exporter in automation you will be asked to provide a Lua script file
+An example script can be found in %AppData%\Local\AutomationGame\luaExporter\.scripts
+The example script file gets generated when you start running the exporter
+
+For documentation on what data can be exported refer to https://wiki.automationgame.com/index.php?title=CarCalculator or the Table Explorer in Automation's debug menu (F9)
