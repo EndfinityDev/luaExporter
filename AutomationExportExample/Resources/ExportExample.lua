@@ -39,7 +39,7 @@ function CExporter.ExportCarFiles(CarCalculator)
 	outputString = outputString .. "Car Name: " .. CarInfo.PlatformInfo.Name .."\n"
 	outputString = outputString .. "Trim Name: " .. CarInfo.TrimInfo.Name .."\n"
 	outputString = outputString .. "Family Name: " .. CarInfo.TrimInfo.EngineInfo.PlatformInfo.Name .."\n"
-	outputString = outputString .. "Family Name: " .. CarInfo.TrimInfo.EngineInfo.ModelInfo.Name .."\n"
+	outputString = outputString .. "Variant Name: " .. CarInfo.TrimInfo.EngineInfo.ModelInfo.Name .."\n"
 
 	outputString = outputString .. "Trim Price: " .. CarInfo.TrimInfo.Results.Price .."\n"
 
