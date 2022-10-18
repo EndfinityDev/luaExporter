@@ -4,4 +4,6 @@ When running the exporter in automation you will be asked to provide a Lua scrip
 An example script can be found in %AppData%\Local\AutomationGame\luaExporter\.scripts
 The example script file gets generated when you start running the exporter
 
-For documentation on what data can be exported refer to https://wiki.automationgame.com/index.php?title=CarCalculator or the Table Explorer in Automation's debug menu (F9)
+Exported data gets written to %AppData%\Local\AutomationGame\luaExporter\[Folder Name] (Folder Name is defined in the exporter screen)
+
+For documentation on what data can be exported refer to https://wiki.automationgame.com/index.php?title=Exporter_Plugin_SDK or the Table Explorer in Automation's debug menu (F9)
