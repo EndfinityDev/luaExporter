@@ -239,138 +239,10 @@ AuCarExpErrorCode AuCarExportDLL::AddLuaStringData(const AuCarExpArray<AuCarExpL
 	return AuCarExpErrorCode_Success;
 }
 
-size_t AuCarExportDLL::FindDirDelimiter(std::wstring dir, size_t start)
-{
-	size_t slashPos = dir.find(L"\\", start);
-
-	if (slashPos == std::wstring::npos)
-	{
-		return dir.find(L"/", start);
-	}
-
-	return slashPos;
-}
-
-
 AuCarExpErrorCode AuCarExportDLL::GetLUAFileLength(unsigned int* retLength)
 {
-	LuaFileManager::Init();
-
-	HGLOBAL hResourceLoaded;  // handle to loaded resource
-	HRSRC   hRes;              // handle/ptr to res. info.
-
-	HMODULE module = GetModuleHandle(PROJECT_FILENAME);
-
-	hRes = FindResource(module, MAKEINTRESOURCE(IDR_LUA_FILE), TEXT("BINARY"));
-
-	TCHAR path[MAX_PATH];
-
-	if (hRes)
-	{
-
-		unsigned int size = SizeofResource(module, hRes);
-
-		hResourceLoaded = LoadResource(module, hRes);
-		char* data = (char*)LockResource(hResourceLoaded);
-
-
-		std::wstring exampleLuaFilePath;
-
-		//get the user's documents directory:
-		if (SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, path) == S_OK)
-		{
-			exampleLuaFilePath = path;
-			exampleLuaFilePath += L"\\AutomationGame\\luaExporter\\.scripts\\";
-
-			DWORD att = GetFileAttributes(exampleLuaFilePath.c_str());
-
-			if (att == INVALID_FILE_ATTRIBUTES)
-			{
-				//create directory, one level at a time:
-				size_t slashPos = FindDirDelimiter(exampleLuaFilePath, 0);
-				size_t offset = 0;
-
-				while (slashPos != std::wstring::npos)
-				{
-					CreateDirectory(exampleLuaFilePath.substr(offset, slashPos - offset).c_str(), nullptr);
-					slashPos = FindDirDelimiter(exampleLuaFilePath, slashPos + 1);
-				}
-
-				//last one:
-				CreateDirectory(exampleLuaFilePath.c_str(), nullptr);
-
-				att = GetFileAttributes(exampleLuaFilePath.c_str());
-			}
-
-			if (att != INVALID_FILE_ATTRIBUTES && att & FILE_ATTRIBUTE_DIRECTORY)
-			{
-				FileManager fileManager;
-
-				unsigned int dataSize = SizeofResource(module, hRes);
-
-				FILE* OutFile = fileManager.OpenFileGlobal((exampleLuaFilePath + L"ExportExample.lua").c_str(), L"wb");
-				if(OutFile)
-					fwrite(data, 1, dataSize, OutFile);
-			}
-		}
-		UnlockResource(hResourceLoaded);
-	}
-
-
-	*retLength = 0;
-
-	OPENFILENAMEA ofn;
-	CHAR szFile[260] = { 0 };
-	ZeroMemory(&ofn, sizeof(OPENFILENAME));
-	ofn.lStructSize = sizeof(OPENFILENAME);
-	ofn.hwndOwner = NULL;
-	ofn.lpstrFile = szFile;
-	ofn.nMaxFile = sizeof(szFile);
-	LPCSTR filter = "Lua Files (*.lua)\0*.lua\0All Files (*.*)\0*.*\0";
-	ofn.lpstrFilter = filter;
-	ofn.nFilterIndex = 1;
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
-
-	char initDir[MAX_PATH];
-
-	if (SHGetFolderPathA(0, CSIDL_LOCAL_APPDATA, 0, SHGFP_TYPE_CURRENT, initDir) == S_OK)
-	{
-		std::string localDir("\\AutomationGame\\luaExporter\\.scripts\\"); // TODO: figure out why this is not working
-		std::string fullDir(initDir + localDir);
-		ofn.lpstrInitialDir = fullDir.c_str();
-	}
-	if (GetOpenFileNameA(&ofn) == TRUE)
-	{
-		//s_LuaFilePath = ofn.lpstrFile;
-		LuaFileManager::Instance()->SetLuaFilePath(ofn.lpstrFile);
-	}
-	else
-	{
-		return AuCarExpErrorCode_UnknownError;
-	}
-
-
-	std::ifstream file(LuaFileManager::Instance()->GetLuaFilePath(), std::ifstream::ate | std::ifstream::binary);
-
-	if(!file.is_open())
-		return AuCarExpErrorCode_UnknownError;
-
-	unsigned int size = file.tellg();
-
-	// get the length of the file
-	file.seekg(0, std::ifstream::end);
-	size_t fileSize = file.tellg();
-	file.seekg(0, std::ifstream::beg);
-
-	// create a vector to hold all the bytes in the file
-	std::vector<byte> data(fileSize, 0);
-
-	// read the file
-	file.read(reinterpret_cast<char*>(&data[0]), fileSize);
-	LuaFileManager::Instance()->SetLuaFileBytes(data);
-
-	// close the file
-	file.close();
+	
+	unsigned int size = LuaFileManager::Instance()->GetLuaFileSize();
 
 	*retLength = size; //size in chars (what we need) is the byte size. We add one for a null terminator
 
@@ -384,39 +256,6 @@ AuCarExpErrorCode AuCarExportDLL::GetLUAFile(AuCarExpArray<wchar_t>& stringBuffe
 		return AuCarExpErrorCode_UnknownError;
 	}
 
-	/*
-	HGLOBAL hResourceLoaded;  // handle to loaded resource
-	HRSRC   hRes;              // handle/ptr to res. info.
-
-	HMODULE module = GetModuleHandle(PROJECT_FILENAME);
-
-	hRes = FindResource(module, MAKEINTRESOURCE(IDR_LUA_FILE), TEXT("BINARY"));
-
-	if (!hRes)
-	{
-		return AuCarExpErrorCode_UnknownError;
-	}
-
-	unsigned int size = SizeofResource(module, hRes);
-
-	hResourceLoaded = LoadResource(module, hRes);
-	char* data = (char*)LockResource(hResourceLoaded);
-	*/
-	//std::ifstream in(s_LuaFilePath, std::ifstream::ate | std::ifstream::binary);
-	//
-	//unsigned int size = in.tellg();
-
-	// open the file for binary reading
-	//std::ifstream file;
-	//file.open(s_LuaFilePath, std::ifstream::binary);
-	//if (!file.is_open())
-	//	return AuCarExpErrorCode_UnknownError;
-
-	
-
-	//if ((fileSize + 1) <= stringBuffer.GetCount())
-	//{
-
 	std::vector<byte> data = LuaFileManager::Instance()->GetLuaFileBytes();
 
 	unsigned int fileSize = stringBuffer.GetCount() - 1;
@@ -426,11 +265,7 @@ AuCarExpErrorCode AuCarExportDLL::GetLUAFile(AuCarExpArray<wchar_t>& stringBuffe
 	}
 
 	stringBuffer[fileSize] = '\0';
-	//}
-	//else
-	//	return AuCarExpErrorCode_UnknownError;
 
-	//UnlockResource(hResourceLoaded);
 	data.clear();
 	LuaFileManager::Free();
 	//delete &s_LuaFileBytes;
@@ -440,4 +275,3 @@ AuCarExpErrorCode AuCarExportDLL::GetLUAFile(AuCarExpArray<wchar_t>& stringBuffe
 	return AuCarExpErrorCode_Success;
 }
 
-//_declspec(dllimport) void CheckExporterVersion();

@@ -4,8 +4,9 @@
 LuaFileManager* LuaFileManager::s_Instance = nullptr;
 
 LuaFileManager::LuaFileManager() :
-	m_LuaFilePath(""),
-	m_LuaFileBytes()
+	m_LuaFilePath(L""),
+	m_LuaFileBytes(),
+	m_LuaFileSize(0)
 {
 	s_Instance = this;
 }

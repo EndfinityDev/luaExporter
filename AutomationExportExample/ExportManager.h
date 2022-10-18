@@ -42,6 +42,8 @@ private:
 
 	void ExportInternal();
 
+	AuCarExpErrorCode InitLuaFileManager();
+
 	size_t FindDirDelimiter(std::wstring dir, size_t start);
 
 	static AuExpManager* s_Instance;

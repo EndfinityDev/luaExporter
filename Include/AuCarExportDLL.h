@@ -152,7 +152,6 @@ extern "C" {          // we need to export the C interface
 		AUCAREXPORTDLL_FUNCTION(GetLUAFileLength, unsigned int* retLength);
 		AUCAREXPORTDLL_FUNCTION(GetLUAFile, AuCarExpArray<wchar_t>& stringBuffer);
 
-		size_t FindDirDelimiter(std::wstring dir, size_t start);
 	}
 
 
