@@ -24,7 +24,7 @@
 //Gets the plugin name, to be displayed in the drop-down list of available plugins
 AuCarExpErrorCode AuCarExportDLL::GetExporterName(AuCarExpArray<wchar_t>& name, wchar_t const* locale)
 {
-	wcscpy_s(name.GetData(), name.GetCount(), L"luaExporter");
+	wcscpy_s(name.GetData(), name.GetCount(), L"LuaExporter");
 
 	return AuCarExpErrorCode_Success;
 }
@@ -161,7 +161,7 @@ AuCarExpErrorCode  AuCarExportDLL::AddExhaust(const AuCarExpArray<AuCarExpMesh*>
 }
 
 //Set the driver and bonnet camera positions
-AuCarExpErrorCode  AuCarExportDLL::AddCameraPositions(const AuCarExpVector* driverCamPosition, const AuCarExpVector* bonnetCamPosition)
+AuCarExpErrorCode  AuCarExportDLL::AddCameraPositions(const AuCarExpCameraData& driverCam, const AuCarExpCameraData& bonnetCam)
 {
 	return AuCarExpErrorCode_Success;
 }
@@ -240,7 +240,13 @@ AuCarExpErrorCode AuCarExportDLL::AddLuaStringData(const AuCarExpArray<AuCarExpL
 	return AuCarExpErrorCode_Success;
 }
 
-AuCarExpErrorCode AuCarExportDLL::GetLUAFileLength(unsigned int* retLength)
+AuCarExpErrorCode AuCarExportDLL::GetLuaFileCount(unsigned int* fileCount)
+{
+	*fileCount = 1;
+	return AuCarExpErrorCode_Success;
+}
+
+AuCarExpErrorCode AuCarExportDLL::GetLuaFileLength(unsigned int* retLength, unsigned int FileNum)
 {
 	LuaFileManager::Init();
 
@@ -364,7 +370,7 @@ AuCarExpErrorCode AuCarExportDLL::GetLUAFileLength(unsigned int* retLength)
 	return AuCarExpErrorCode_Success;
 }
 
-AuCarExpErrorCode AuCarExportDLL::GetLUAFile(AuCarExpArray<wchar_t>& stringBuffer)
+AuCarExpErrorCode AuCarExportDLL::GetLuaFile(AuCarExpArray<wchar_t>& stringBuffer, unsigned int FileNum)
 {
 	if (!stringBuffer.GetData())
 	{

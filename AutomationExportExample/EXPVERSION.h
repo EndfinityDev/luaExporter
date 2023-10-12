@@ -1,4 +1,5 @@
 #pragma once
 
-#define EXPVERSION		202210184
+#define EXPVERSION 20231012
 #define EXPVERSIONWS std::to_wstring(EXPVERSION)
+
