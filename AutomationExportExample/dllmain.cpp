@@ -59,6 +59,7 @@ AuCarExpErrorCode AuCarExportDLL::GetRequiredStringData(AuCarExpArray<AuCarExpUI
 	//set the values:
 	wcscpy_s(stringData[0].Label, L"Folder Name");//label
 	wcscpy_s(stringData[0].Value, L"[PlayerName] [PlatformName] [TrimName]");//default value
+	wcscpy_s(stringData[0].ToolTip, L"Name of the folder inside the luaExporter user directory where the output files will be placed");//label
 
 	return AuCarExpErrorCode_Success;
 }
